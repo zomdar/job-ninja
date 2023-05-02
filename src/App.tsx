@@ -49,7 +49,7 @@ const App: React.FC = () => {
               <span className="mr-4">{text}</span>
               <button
                 onClick={() => handleCopy(text, index)}
-                className="bg-draculaPurple text-draculaBackground py-1 px-4 rounded mr-2"
+                className="bg-blue-400 text-draculaBackground py-1 px-4 rounded mr-2"
               >
                 Copy
               </button>
