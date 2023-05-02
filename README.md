@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+## Job Ninja - Your Ultimate Job Application Assistant
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Welcome to Job Ninja, a revolutionary job application tool designed to streamline and simplify your job search process. We understand how challenging and time-consuming it can be to find and apply for the perfect job. That's why we've created an app that acts as your personal job application ninja, working stealthily and efficiently to secure your dream job.##
 
 ## Available Scripts
 
