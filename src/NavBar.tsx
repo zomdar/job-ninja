@@ -22,7 +22,7 @@ const NavBar: React.FC = () => {
           </li>
           <li className="mx-2">
             <Link
-              to="/other-page"
+              to="/compose"
               className="text-draculaForeground font-semibold"
             >
               Compose
