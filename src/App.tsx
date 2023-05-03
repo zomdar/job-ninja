@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import './tailwind.css';
 import NavBar from './NavBar';
 import InputWithSave from './InputWithSave';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 interface SavedItem {
   label: string;
