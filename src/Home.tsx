@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import InputWithSave from './InputWithSave';
+import { TrashIcon } from '@heroicons/react/24/solid'
 
 interface SavedItem {
   label: string;
@@ -56,7 +57,7 @@ const Home: React.FC = () => {
               onClick={() => handleDelete(index)}
               className="bg-pastelRed text-draculaBackground py-1 px-4 rounded"
             >
-              {/* The delete icon SVG */}
+                <TrashIcon className='h-5 w-5' />
             </button>
           </li>
         ))}
