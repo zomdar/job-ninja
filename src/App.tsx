@@ -11,7 +11,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 const App: React.FC = () => {
   return (
     <Router>
-      <div className="App bg-draculaBackground text-draculaForeground min-h-screen">
+      <div className="App bg-darkBackgroundColor text-draculaForeground min-h-screen">
         <NavBar />
         <Routes>
           <Route path="/" element={<Home />} />

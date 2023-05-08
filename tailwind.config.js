@@ -4,6 +4,11 @@ module.exports = {
   theme: {
     extend: {
       backgroundColor: {
+        primaryBase: "#AADF9F",
+        subText: "#5C5C77",
+        secondaryLight: "#DBD7FD",
+        secondaryBase: "#7B66FA",
+        darkBackgroundColor: '#3C3C3C',
         draculaBackground: '#282a36',
         draculaCurrentLine: '#44475a',
         draculaForeground: '#f8f8f2',
@@ -17,6 +22,11 @@ module.exports = {
         draculaYellow: '#f1fa8c',
       },
       textColor: {
+        primaryBase: "#AADF9F",
+        subText: "#5C5C77",
+        secondaryLight: "#DBD7FD",
+        secondaryBase: "#7B66FA",
+        darkBackgroundColor: '#3C3C3C',
         draculaForeground: '#f8f8f2',
         draculaComment: '#6272a4',
         draculaCyan: '#8be9fd',
