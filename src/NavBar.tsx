@@ -40,15 +40,23 @@ const NavBar: React.FC = () => {
           </div>
         </Link>
         <div className="hidden md:flex space-x-4">
-          <Link to="/" className="text-secondaryLight hover:text-secondaryBase">
+          <NavLink to="/" className={({ isActive }) =>
+            isActive
+              ? "text-purple-500 hover:text-secondaryBase font-bold"
+              : "text-secondaryLight hover:text-secondaryBase"
+          }>
             Home
-          </Link>
-          <Link
-            to="/compose"
-            className="text-secondaryLight hover:text-secondaryBase"
+          </NavLink>
+          <NavLink
+            to="/compose/"
+            className={({ isActive }) =>
+              isActive
+                ? "text-purple-500 hover:text-secondaryBase font-bold"
+                : "text-secondaryLight hover:text-secondaryBase"
+            }
           >
             Compose
-          </Link>
+          </NavLink>
         </div>
         <div className="md:hidden">
           <button

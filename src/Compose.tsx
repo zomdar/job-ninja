@@ -1,94 +1,45 @@
 // src/Compose.tsx
 
 import React, { useState } from 'react';
+import { NavLink, Route, Routes, Outlet } from 'react-router-dom';
 import axios from 'axios';
 
 const Compose: React.FC = () => {
-    const [jobTitle, setJobTitle] = useState('');
-    const [companyName, setCompanyName] = useState('');
-    const [generatedText, setGeneratedText] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-
-    const handleSubmit = async () => {
-        setIsLoading(true);
-        // Replace this with your OpenAI API key and endpoint
-        const API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
-        const ENDPOINT = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
-
-        const prompt = `Using the following template, generate a cover letter for a ${jobTitle} position at ${companyName}:
-
-        Dear Hiring Manager,
-      
-        I am excited to submit my application for the [Job Title] position at [Company Name]. As a [job-related quality], I am confident that I would be a great addition to your team.
-      
-        [A paragraph about the applicant's relevant experience or passion]
-      
-        [A paragraph about the applicant's reliability and responsibility]
-      
-        I am excited about the opportunity to work for [Company Name], a company that shares my values and commitment to [company values]. Thank you for considering my application, and I look forward to the opportunity to discuss my qualifications further.
-      
-        Sincerely,
-      
-        [Your Name]
-        `;
-
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${API_KEY}`,
-            },
-        };
-
-        const data = {
-            prompt,
-            max_tokens: 400,
-            n: 1,
-            stop: null,
-            temperature: 0.8,
-        };
-
-
-        try {
-            const response = await axios.post(ENDPOINT, data, config);
-            const generatedText = response.data.choices[0].text;
-            setGeneratedText(generatedText);
-        } catch (error) {
-            console.error('Error generating cover letter draft:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
+    
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Compose Cover Letter Draft</h1>
-            <input
-                type="text"
-                placeholder="Job Title"
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="border border-draculaForeground p-2 mr-2 mb-4 text-black"
-            />
-            <input
-                type="text"
-                placeholder="Company Name"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="border border-draculaForeground p-2 mr-2 mb-4 text-black"
-            />
-            <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mb-4">
-                Generate Draft
-            </button>
-            {isLoading ? (
-                <p className='mb-4 text-green'>Loading...</p>
-            ) : (
-                generatedText && (
-                    <div className="border border-draculaForeground p-4 bg-draculaBackground text-white mt-6">
-                        <h2 className="text-xl font-bold mb-2">Generated Cover Letter Draft:</h2>
-                        <div className="whitespace-pre-line">{generatedText}</div>
-                    </div>
-                )
-            )}
+        <div className="container flex-col p-4">
+            <div className="hero-text py-4">
+                <h1
+                    className="text-4xl text-primaryBase font-extrabold"
+                    style={{
+                        textShadow:
+                            "0.000em 0.075em #7B66FA, 0.029em 0.069em #7B66FA, 0.053em 0.053em #7B66FA, 0.069em 0.029em #7B66FA, 0.075em 0.000em #7B66FA, 0.069em -0.029em #7B66FA, 0.053em -0.053em #7B66FA, 0.029em -0.069em #7B66FA, 0.000em -0.075em #7B66FA, -0.029em -0.069em #7B66FA, -0.053em -0.053em #7B66FA, -0.069em -0.029em #7B66FA, -0.075em -0.000em #7B66FA, -0.069em 0.029em #7B66FA, -0.053em 0.053em #7B66FA, -0.029em 0.069em #7B66FA",
+                    }}
+                >
+                    Compose
+                </h1>
+            </div>
+            <div className="flex space-x-4">
+                <NavLink
+                    to="cover-letter"
+                    className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600"
+                >
+                    Cover Letter
+                </NavLink>
+                <NavLink
+                    to="resume"
+                    className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600"
+                >
+                    Resume
+                </NavLink>
+                <NavLink
+                    to="questions"
+                    className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600"
+                >
+                    Questions
+                </NavLink>
+            </div>
+            <Outlet />
         </div>
     );
 };
