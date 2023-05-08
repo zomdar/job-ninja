@@ -8,9 +8,7 @@ import Compose from './Compose';
 import CoverLetter from "./CoverLetter";
 import Questions from "./Questions";
 import Resume from "./Resume";
-
-
-import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
 
 const App: React.FC = () => {
   return (
@@ -20,6 +18,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/compose" element={<Compose />}>
+            <Route index element={<CoverLetter />} />
             <Route path="cover-letter" element={<CoverLetter />} />
             <Route path="resume" element={<Resume />} />
             <Route path="questions" element={<Questions />} />

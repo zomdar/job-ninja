@@ -60,8 +60,7 @@ const CoverLetter: React.FC = () => {
     };
 
     return (
-        <div>
-            <h2>CoverLetter</h2>
+        <div className='py-6'>
             <input
                 type="text"
                 placeholder="Job Title"

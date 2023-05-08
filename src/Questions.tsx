@@ -4,8 +4,8 @@ import React from 'react';
 
 const Questions: React.FC = () => {
   return (
-    <div>
-      <h2>Questions</h2>
+    <div className='py-4'>
+      <h2>Interview Questions Coming Soon!</h2>
     </div>
   );
 };

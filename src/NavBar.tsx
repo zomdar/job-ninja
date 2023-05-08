@@ -1,11 +1,12 @@
 // src/NavBar.tsx
 
 import React, { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 
 const NavBar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -31,6 +32,8 @@ const NavBar: React.FC = () => {
     };
   }, []);
 
+  const composeSubRoutes = ["/compose", "/compose/cover-letter", "/compose/resume", "/compose/questions"];
+
   return (
     <nav className="bg-subText py-4">
       <div className="container mx-auto flex justify-between items-center px-4 md:px-0">
@@ -48,9 +51,9 @@ const NavBar: React.FC = () => {
             Home
           </NavLink>
           <NavLink
-            to="/compose/"
+            to="/compose/cover-letter"
             className={({ isActive }) =>
-              isActive
+              isActive || composeSubRoutes.includes(location.pathname)
                 ? "text-secondaryLight hover:text-secondaryBase font-bold"
                 : "text-secondaryLight hover:text-secondaryBase"
             }
@@ -82,7 +85,7 @@ const NavBar: React.FC = () => {
                 onClick={handleChoiceClick}
                 to="/compose"
                 className={({ isActive }) =>
-                  isActive
+                  isActive || composeSubRoutes.includes(location.pathname)
                     ? "block px-4 py-2 text-secondaryBase hover:bg-indigo-100 font-bold"
                     : "block px-4 py-2 text-secondaryBase hover:bg-indigo-100"
                 }
