@@ -9,8 +9,33 @@ const CoverLetter: React.FC = () => {
     const [generatedText, setGeneratedText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [copiedIndex, setCopiedIndex] = useState<number>(-1);
+    const [jobTitleError, setJobTitleError] = useState(false);
+    const [companyNameError, setCompanyNameError] = useState(false);
 
     const handleSubmit = async () => {
+        // Reset error states
+        setJobTitleError(false);
+        setCompanyNameError(false);
+
+        // Use local variables to store error states
+        let localJobTitleError = false;
+        let localCompanyNameError = false;
+
+        // Set error states if inputs are empty or contain only whitespace
+        if (!jobTitle.trim()) {
+            setJobTitleError(true);
+            localJobTitleError = true;
+        }
+        if (!companyName.trim()) {
+            setCompanyNameError(true);
+            localCompanyNameError = true;
+        }
+
+        // Return if there are any errors, preventing the API call
+        if (localJobTitleError || localCompanyNameError) {
+            return;
+        }
+
         setIsLoading(true);
 
         const API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
@@ -83,14 +108,14 @@ const CoverLetter: React.FC = () => {
                     placeholder="Job Title"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
-                    className="bg-accent text-subText rounded-md py-2 px-4 mr-2"
+                    className={`bg-accent text-subText rounded-md py-2 px-4 mr-2 ${jobTitleError ? 'border-2 border-red-500' : ''}`}
                 />
                 <input
                     type="text"
                     placeholder="Company Name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className="bg-accent text-subText rounded-md py-2 px-4 mr-2"
+                    className={`bg-accent text-subText rounded-md py-2 px-4 mr-2 ${companyNameError ? 'border-2 border-red-500' : ''}`}
                 />
             </div>
             <div className="flex gap-3 py-4">

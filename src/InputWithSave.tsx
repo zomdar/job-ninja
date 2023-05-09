@@ -10,13 +10,13 @@ interface InputWithSaveProps {
 const InputWithSave: React.FC<InputWithSaveProps> = ({ onSave, onClose }) => {
   const [label, setLabel] = useState("");
   const [text, setText] = useState("");
+  const [error, setError] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Check if label or text input fields are empty or contain only whitespace
     if (!label.trim() || !text.trim()) {
-      alert("Label and Text fields cannot be empty.");
+      setError(true);
       return;
     }
 
@@ -33,15 +33,25 @@ const InputWithSave: React.FC<InputWithSaveProps> = ({ onSave, onClose }) => {
           type="text"
           placeholder="Label"
           value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          className="bg-draculaBackground text-draculaForeground border border-draculaPurple rounded py-2 px-4 mr-2"
+          onChange={(e) => {
+            setLabel(e.target.value);
+            setError(false);
+          }}
+          className={`bg-draculaBackground text-draculaForeground border ${
+            error && !label.trim() ? "border-red-600" : "border-draculaPurple"
+          } rounded py-2 px-4 mr-2`}
         />
         <input
           type="text"
           placeholder="Text"
           value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="bg-draculaBackground text-draculaForeground border border-draculaPurple rounded py-2 px-4 mr-2"
+          onChange={(e) => {
+            setText(e.target.value);
+            setError(false);
+          }}
+          className={`bg-draculaBackground text-draculaForeground border ${
+            error && !text.trim() ? "border-red-600" : "border-draculaPurple"
+          } rounded py-2 px-4 mr-2`}
         />
       </div>
       <div className="flex gap-2">
