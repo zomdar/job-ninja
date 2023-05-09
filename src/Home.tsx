@@ -13,6 +13,7 @@ const Home: React.FC = () => {
   const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
   const [copiedIndex, setCopiedIndex] = useState<number>(-1);
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [flashingIndex, setFlashingIndex] = useState<number>(-1);
 
   const handleSave = (label: string, text: string) => {
     setSavedItems([...savedItems, { label, text }]);
@@ -24,15 +25,18 @@ const Home: React.FC = () => {
       () => {
         console.log("Text copied to clipboard:", text);
         setCopiedIndex(index);
+        setFlashingIndex(index);
         setTimeout(() => {
           setCopiedIndex(-1);
-        }, 1000);
+          setFlashingIndex(-1);
+        }, 500);
       },
       (err) => {
         console.error("Could not copy text:", err);
       }
     );
   };
+
 
   const handleDelete = (index: number) => {
     setSavedItems(savedItems.filter((_, i) => i !== index));
@@ -111,18 +115,19 @@ const Home: React.FC = () => {
       )}
       <ul className="mt-4">
         {savedItems.map(({ label, text }, index) => (
-          <li key={index} className="flex items-center my-2">
-            <span className="font-bold mr-4">{label}:</span>
-            <span className="mr-4">{text}</span>
-            <button
+          <li key={index} className="flex items-center my-3">
+            <div
+              className={`content flex gap-2 p-2 rounded-md hover:border hover:bg-linksHoverBackground cursor-pointer ${flashingIndex === index ? "border-green-500" : ""
+                }`}
               onClick={() => handleCopy(text, index)}
-              className="bg-blue-400 text-draculaBackground py-1 px-4 rounded mr-2"
+              style={{ transition: "border-color 500ms" }}
             >
-              Copy
-            </button>
-            {copiedIndex === index && (
-              <span className="ml-2 text-draculaGreen">Copied</span>
-            )}
+              <span className="font-bold">{label}:</span>
+              <span className="">{text}</span>
+            </div>
+            {/* {copiedIndex === index && (
+              <span className="ml-2 text-draculaGreen text-xs">Copied</span>
+            )} */}
             <button
               onClick={() => handleDelete(index)}
               className="bg-pastelRed text-draculaBackground py-1 px-4 rounded"
