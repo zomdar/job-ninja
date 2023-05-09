@@ -8,7 +8,7 @@ const Compose: React.FC = () => {
   
 
   return (
-    <div className="container flex-col p-4">
+    <div className="flex-col p-4">
       <div className="hero-text py-4">
         <h1
           className="text-4xl text-primaryBase font-extrabold"
@@ -20,7 +20,7 @@ const Compose: React.FC = () => {
           Compose
         </h1>
       </div>
-      <div className="flex font-bold">
+      <div className="flex font-bold text-sm">
         <NavLink
           to="cover-letter"
           className={({ isActive }) =>

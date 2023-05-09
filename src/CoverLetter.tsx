@@ -8,10 +8,11 @@ const CoverLetter: React.FC = () => {
     const [companyName, setCompanyName] = useState('');
     const [generatedText, setGeneratedText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [copiedIndex, setCopiedIndex] = useState<number>(-1);
 
     const handleSubmit = async () => {
         setIsLoading(true);
-        // Replace this with your OpenAI API key and endpoint
+
         const API_KEY = process.env.REACT_APP_OPENAI_API_KEY;
         const ENDPOINT = 'https://api.openai.com/v1/engines/text-davinci-003/completions';
 
@@ -59,31 +60,54 @@ const CoverLetter: React.FC = () => {
         }
     };
 
+    const handleCopy = (text: string, index: number) => {
+        navigator.clipboard.writeText(text).then(
+            () => {
+                console.log("Text copied to clipboard:", text);
+                setCopiedIndex(index);
+                setTimeout(() => {
+                    setCopiedIndex(-1);
+                }, 1000);
+            },
+            (err) => {
+                console.error("Could not copy text:", err);
+            }
+        );
+    };
+
     return (
-        <div className='py-6'>
-            <input
-                type="text"
-                placeholder="Job Title"
-                value={jobTitle}
-                onChange={(e) => setJobTitle(e.target.value)}
-                className="bg-draculaBackground text-draculaForeground border border-draculaPurple rounded py-2 px-4 mr-2"
-            />
-            <input
-                type="text"
-                placeholder="Company Name"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="bg-draculaBackground text-draculaForeground border border-draculaPurple rounded py-2 px-4 mr-2"
-            />
-            <button onClick={handleSubmit} className="bg-blue-500 text-white p-2 rounded mb-4">
-                Generate Draft
-            </button>
+        <div className='py-6 flex-col'>
+            <div className="flex">
+                <input
+                    type="text"
+                    placeholder="Job Title"
+                    value={jobTitle}
+                    onChange={(e) => setJobTitle(e.target.value)}
+                    className="bg-accent text-subText rounded-md py-2 px-4 mr-2"
+                />
+                <input
+                    type="text"
+                    placeholder="Company Name"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    className="bg-accent text-subText rounded-md py-2 px-4 mr-2"
+                />
+            </div>
+            <div className="flex gap-3 py-4">
+                <button
+                    onClick={() => handleCopy(generatedText, 0)}
+                    className="bg-accent text-secondaryBase px-4 py-2 rounded-md font-bold hover:bg-secondaryLightHover text-sm">
+                    COPY
+                </button>
+                <button onClick={handleSubmit} className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryLightHover text-sm">
+                    DRAFT LETTER
+                </button>
+            </div>
             {isLoading ? (
                 <p className='mb-4 text-green'>Loading...</p>
             ) : (
                 generatedText && (
-                    <div className="border border-draculaForeground p-4 bg-draculaBackground text-white mt-6">
-                        <h2 className="text-xl font-bold mb-2">Generated Cover Letter Draft:</h2>
+                    <div className="p-4 bg-accent rounded-md text-subText mt-6">
                         <div className="whitespace-pre-line">{generatedText}</div>
                     </div>
                 )

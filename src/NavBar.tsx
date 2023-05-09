@@ -83,7 +83,7 @@ const NavBar: React.FC = () => {
               </NavLink>
               <NavLink
                 onClick={handleChoiceClick}
-                to="/compose"
+                to="/compose/cover-letter"
                 className={({ isActive }) =>
                   isActive || composeSubRoutes.includes(location.pathname)
                     ? "block px-4 py-2 text-secondaryBase hover:bg-indigo-100 font-bold"

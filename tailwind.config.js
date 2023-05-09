@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       backgroundColor: {
         primaryBase: "#AADF9F",
+        accent: "#EEF2F5",
         subText: "#5C5C77",
         secondaryLight: "#DBD7FD",
         secondaryLightHover: '#C2BBFC',
@@ -25,6 +26,7 @@ module.exports = {
       },
       textColor: {
         primaryBase: "#AADF9F",
+        accent: "#EEF2F5",
         subText: "#5C5C77",
         secondaryLight: "#DBD7FD",
         secondaryLightHover: '#C2BBFC',
