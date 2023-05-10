@@ -7,14 +7,24 @@ const AuthButtons: React.FC = () => {
 
   const handleLogin = () => {
     loginWithRedirect({ appState: { returnTo: redirectUri } });
-  };  
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <div>
       {!isAuthenticated && (
-        <button onClick={handleLogin}>Log in</button>
+        <div className="block px-4 py-2 text-left text-secondaryBase hover:bg-indigo-100" onClick={handleLogin}>
+          <button className="w-full">Log in</button>
+        </div>
       )}
-      {isAuthenticated && <button onClick={() => logout()}>Log out</button>}
+      {isAuthenticated && (
+        <div className="block px-4 py-2 text-left text-secondaryBase hover:bg-indigo-100" onClick={handleLogout}>
+          <button className="w-full">Log out</button>
+        </div>
+      )}
     </div>
   );
 };
