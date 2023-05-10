@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Bars3Icon } from "@heroicons/react/24/outline";
+import AuthButtons from './AuthButtons';
 
 const NavBar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,26 +43,7 @@ const NavBar: React.FC = () => {
             <span className="text-l font-bold text-secondaryBase">WC</span>
           </div>
         </Link>
-        <div className="hidden md:flex space-x-4">
-          <NavLink to="/" className={({ isActive }) =>
-            isActive
-              ? "text-secondaryLight hover:text-secondaryBase font-bold"
-              : "text-secondaryLight hover:text-secondaryBase"
-          }>
-            Home
-          </NavLink>
-          <NavLink
-            to="/compose/cover-letter"
-            className={({ isActive }) =>
-              isActive || composeSubRoutes.includes(location.pathname)
-                ? "text-secondaryLight hover:text-secondaryBase font-bold"
-                : "text-secondaryLight hover:text-secondaryBase"
-            }
-          >
-            Compose
-          </NavLink>
-        </div>
-        <div className="md:hidden">
+        <div className="relative">
           <button
             onClick={toggleDropdown}
             className="text-secondaryLight focus:outline-none hover:text-secondaryBase"
@@ -92,6 +74,8 @@ const NavBar: React.FC = () => {
               >
                 Compose
               </NavLink>
+              <hr />
+              <AuthButtons />
             </div>
           )}
         </div>

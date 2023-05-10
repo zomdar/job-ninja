@@ -9,6 +9,7 @@ import CoverLetter from "./CoverLetter";
 import Questions from "./Questions";
 import Resume from "./Resume";
 import { BrowserRouter as Router, Route, Routes, Link, Navigate } from 'react-router-dom';
+import ProtectedRoute from './ProtectedRoute';
 
 const App: React.FC = () => {
   return (
