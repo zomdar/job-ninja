@@ -2,9 +2,9 @@
 
 import React, { useState } from "react";
 import InputWithSave from "./InputWithSave";
-import { TrashIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
 
-interface SavedItem {
+export interface SavedItem {
   label: string;
   text: string;
 }
@@ -14,11 +14,20 @@ const Home: React.FC = () => {
   const [copiedIndex, setCopiedIndex] = useState<number>(-1);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [flashingIndex, setFlashingIndex] = useState<number>(-1);
+  const [editingIndex, setEditingIndex] = useState<number>(-1);
 
   const handleSave = (label: string, text: string) => {
-    setSavedItems([...savedItems, { label, text }]);
+    if (editingIndex >= 0) {
+      const updatedItems = [...savedItems];
+      updatedItems[editingIndex] = { label, text };
+      setSavedItems(updatedItems);
+      setEditingIndex(-1);
+    } else {
+      setSavedItems([...savedItems, { label, text }]);
+    }
     setShowModal(false);
   };
+
 
   const handleCopy = (text: string, index: number) => {
     navigator.clipboard.writeText(text).then(
@@ -42,16 +51,22 @@ const Home: React.FC = () => {
     setSavedItems(savedItems.filter((_, i) => i !== index));
   };
 
+  const openModalForEdit = (index: number) => {
+    setEditingIndex(index);
+    setShowModal(true);
+  };
+
   const openModal = () => {
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
+    setEditingIndex(-1);
   };
 
   return (
-    <div className="container flex-col p-4">
+    <div className="container mx-auto flex-col p-4">
       <div className="profile py-4">
         <h1
           className="text-4xl text-primaryBase font-extrabold"
@@ -81,31 +96,37 @@ const Home: React.FC = () => {
       </div>
       {showModal && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 transition-opacity"
-              aria-hidden="true"
-              onClick={closeModal}
-            >
-              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-            </div>
-            <span
-              className="hidden sm:inline-block sm:align-middle sm:h-screen"
-              aria-hidden="true"
-            >
-              &#8203;
-            </span>
-            <div className="inline-block align-bottom bg-darkBackgroundColor rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-darkBackgroundColor px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="mt-3 text-start sm:mt-0 sm:text-left">
-                  <h3
-                    className="text-lg leading-6 font-medium text-draculaBackground"
-                    id="modal-title"
-                  >
-                    Add New Item
-                  </h3>
-                  <div className="mt-2">
-                    <InputWithSave onSave={handleSave} onClose={closeModal} />
+          <div className="fixed z-10 inset-0 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+                onClick={closeModal}
+              >
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+              <span
+                className="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
+              <div className="inline-block align-bottom bg-darkBackgroundColor rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="bg-darkBackgroundColor px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="mt-3 text-start sm:mt-0 sm:text-left">
+                    <h3
+                      className="text-lg leading-6 font-medium text-draculaBackground"
+                      id="modal-title"
+                    >
+                      Add New Item
+                    </h3>
+                    <div className="mt-2">
+                      <InputWithSave
+                        onSave={handleSave}
+                        onClose={closeModal}
+                        initialValues={editingIndex >= 0 ? savedItems[editingIndex] : undefined}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -113,30 +134,38 @@ const Home: React.FC = () => {
           </div>
         </div>
       )}
-      <ul className="mt-4">
+      <div className="flex flex-wrap justify-between mt-4 space-y-4">
         {savedItems.map(({ label, text }, index) => (
-          <li key={index} className="flex items-center my-3">
-            <div
-              className={`content flex gap-2 p-2 rounded-md hover:border hover:bg-linksHoverBackground cursor-pointer ${flashingIndex === index ? "border-green-500" : ""
-                }`}
-              onClick={() => handleCopy(text, index)}
-              style={{ transition: "border-color 500ms" }}
-            >
-              <span className="font-bold">{label}:</span>
-              <span className="">{text}</span>
+          <div className="flex-col my-3 w-1/2">
+            <div className="group relative">
+              <div className="absolute top-[-2.5rem] right-0 pr-1">
+                <button
+                  onClick={() => openModalForEdit(index)}
+                  className="flex gap-1 justify-center bg-secondaryBase text-draculaBackground text-xs py-2 px-3 rounded font-bold shadow-md hover:bg-draculaComment opacity-0 group-hover:opacity-100"
+                >
+                  <PencilIcon className="h-3 w-3" />
+                  EDIT
+                </button>
+              </div>
+              <div
+                key={index}
+                className={`content flex gap-2 p-2 rounded-md cursor-pointer border-transparent group-hover:border group-hover:border-gray-300 group-hover:bg-linksHoverBackground ${flashingIndex === index ? "group-hover:border-green-500" : ""
+                  }`}
+                onClick={() => handleCopy(text, index)}
+                style={{ transition: "border-color 200ms" }}
+              >
+                <span className="font-bold">{label}:</span>
+                <span className="truncate w-4/5">{text}</span>
+              </div>
             </div>
-            {/* {copiedIndex === index && (
-              <span className="ml-2 text-draculaGreen text-xs">Copied</span>
-            )} */}
-            <button
-              onClick={() => handleDelete(index)}
-              className="bg-pastelRed text-draculaBackground py-1 px-4 rounded"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
+
+
+
+
+
     </div>
   );
 };

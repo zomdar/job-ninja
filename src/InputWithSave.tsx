@@ -1,15 +1,22 @@
 // src/InputWithSave.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { SavedItem } from "./Home";
 
 interface InputWithSaveProps {
   onSave: (label: string, text: string) => void;
   onClose: () => void;
+  initialValues?: SavedItem;
 }
 
-const InputWithSave: React.FC<InputWithSaveProps> = ({ onSave, onClose }) => {
-  const [label, setLabel] = useState("");
-  const [text, setText] = useState("");
+const InputWithSave: React.FC<InputWithSaveProps> = ({
+  onSave,
+  onClose,
+  initialValues,
+}) => {
+  const [label, setLabel] = useState<string>(initialValues?.label || "");
+  const [text, setText] = useState<string>(initialValues?.text || "");
+
   const [error, setError] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,6 +32,13 @@ const InputWithSave: React.FC<InputWithSaveProps> = ({ onSave, onClose }) => {
     setLabel("");
     setText("");
   };
+  useEffect(() => {
+    if (initialValues) {
+      setLabel(initialValues.label);
+      setText(initialValues.text);
+    }
+  }, [initialValues]);
+
 
   return (
     <form onSubmit={handleSubmit} className="flex-col items-center">
@@ -37,9 +51,8 @@ const InputWithSave: React.FC<InputWithSaveProps> = ({ onSave, onClose }) => {
             setLabel(e.target.value);
             setError(false);
           }}
-          className={`bg-draculaBackground text-draculaForeground border ${
-            error && !label.trim() ? "border-red-600" : "border-draculaPurple"
-          } rounded py-2 px-4 mr-2`}
+          className={`bg-draculaBackground text-draculaForeground border ${error && !label.trim() ? "border-red-600" : "border-draculaPurple"
+            } rounded py-2 px-4 mr-2`}
         />
         <input
           type="text"
@@ -49,9 +62,8 @@ const InputWithSave: React.FC<InputWithSaveProps> = ({ onSave, onClose }) => {
             setText(e.target.value);
             setError(false);
           }}
-          className={`bg-draculaBackground text-draculaForeground border ${
-            error && !text.trim() ? "border-red-600" : "border-draculaPurple"
-          } rounded py-2 px-4 mr-2`}
+          className={`bg-draculaBackground text-draculaForeground border ${error && !text.trim() ? "border-red-600" : "border-draculaPurple"
+            } rounded py-2 px-4 mr-2`}
         />
       </div>
       <div className="flex gap-2">
