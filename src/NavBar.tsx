@@ -36,7 +36,7 @@ const NavBar: React.FC = () => {
 
   return (
     <nav className="bg-subText py-4">
-      <div className="container mx-auto flex justify-between items-center px-4 md:px-0">
+      <div className="container mx-auto flex justify-between items-center px-4">
         <Link to="/">
           <div className="bg-secondaryLight w-12 h-12 flex items-center justify-center rounded-full">
             <span className="text-l font-bold text-secondaryBase">WC</span>
