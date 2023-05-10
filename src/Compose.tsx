@@ -8,7 +8,7 @@ const Compose: React.FC = () => {
   
 
   return (
-    <div className="flex-col p-4">
+    <div className="container mx-auto flex-col p-4">
       <div className="hero-text py-4">
         <h1
           className="text-4xl text-primaryBase font-extrabold"
