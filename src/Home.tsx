@@ -1,12 +1,14 @@
 // src/Home.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputWithSave from "./InputWithSave";
 import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export interface SavedItem {
   label: string;
   text: string;
+  _id: number;
 }
 
 const Home: React.FC = () => {
@@ -16,23 +18,92 @@ const Home: React.FC = () => {
   const [flashingIndex, setFlashingIndex] = useState<number>(-1);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
 
-  const handleSave = (label: string, text: string) => {
-    if (editingIndex >= 0) {
-      const updatedItems = [...savedItems];
-      updatedItems[editingIndex] = { label, text };
-      setSavedItems(updatedItems);
-      setEditingIndex(-1);
-    } else {
-      setSavedItems([...savedItems, { label, text }]);
+  const { user, isAuthenticated, isLoading } = useAuth0();
+
+  useEffect(() => {
+    const fetchSavedItems = async () => {
+      if (isAuthenticated) {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/${user?.sub}/links`);
+        const items = await response.json();
+        setSavedItems(items);
+      }
+    };
+
+    fetchSavedItems();
+  }, [isAuthenticated, user]);
+
+  if (isLoading) {
+    return <div>Loading ...</div>;
+  }
+
+  const handleSave = async (label: string, text: string) => {
+    const newItem = { label, text };
+
+    if (user?.sub === undefined) {
+      console.error("user.sub is undefined");
+      return;
     }
+
+    const url = `${process.env.REACT_APP_API_URL}/api/${encodeURIComponent(user?.sub)}/links`;
+    let response;
+
+    // check if we're in edit mode
+    if (editingIndex >= 0) {
+      // update the existing item
+      const itemToUpdate = savedItems[editingIndex];
+      console.log("saved items", savedItems);
+      console.log("items", savedItems);
+      response = await fetch(`${url}/${itemToUpdate._id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newItem),
+      });
+    } else {
+      // create a new item
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newItem),
+      });
+    }
+
+    if (response.ok) {
+      const updatedItem = await response.json();
+      if (editingIndex >= 0) {
+        // replace the item at editingIndex with updatedItem
+        setSavedItems(prevItems => prevItems.map((item, index) => index === editingIndex ? updatedItem : item));
+      } else {
+        // add the new item to the end of the list
+        setSavedItems(prevItems => [...prevItems, updatedItem]);
+      }
+    } else {
+      console.error('Error saving item:', await response.text());
+    }
+
+    setEditingIndex(-1);
     setShowModal(false);
   };
 
 
+  const handleDelete = async (index: number) => {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/${user?.sub}/links/${savedItems[index]._id}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      setSavedItems(savedItems.filter((_, i) => i !== index));
+    } else {
+      console.error('Error deleting item:', await response.text());
+    }
+  };
+
   const handleCopy = (text: string, index: number) => {
     navigator.clipboard.writeText(text).then(
       () => {
-        console.log("Text copied to clipboard:", text);
         setCopiedIndex(index);
         setFlashingIndex(index);
         setTimeout(() => {
@@ -44,11 +115,6 @@ const Home: React.FC = () => {
         console.error("Could not copy text:", err);
       }
     );
-  };
-
-
-  const handleDelete = (index: number) => {
-    setSavedItems(savedItems.filter((_, i) => i !== index));
   };
 
   const openModalForEdit = (index: number) => {
@@ -67,6 +133,13 @@ const Home: React.FC = () => {
 
   return (
     <div className="container mx-auto flex-col p-4">
+      {isAuthenticated && (
+        <div>
+          <img src={user?.picture} alt={user?.name} />
+          <h2>{user?.name}</h2>
+          <p>{user?.email}</p>
+        </div>
+      )}
       <div className="profile py-4">
         <h1
           className="text-4xl text-primaryBase font-extrabold"
