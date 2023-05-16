@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ClipboardDocumentIcon } from "@heroicons/react/24/solid";
 import Lottie from 'lottie-react';
 
 const CoverLetter: React.FC = () => {
@@ -10,6 +11,7 @@ const CoverLetter: React.FC = () => {
     const [generatedText, setGeneratedText] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [copiedIndex, setCopiedIndex] = useState<number>(-1);
+    const [flashingIndex, setFlashingIndex] = useState<number>(-1);
     const [jobTitleError, setJobTitleError] = useState(false);
     const [companyNameError, setCompanyNameError] = useState(false);
     const [loadingAnimation, setLoadingAnimation] = useState(null);
@@ -104,11 +106,12 @@ const CoverLetter: React.FC = () => {
     const handleCopy = (text: string, index: number) => {
         navigator.clipboard.writeText(text).then(
             () => {
-                console.log("Text copied to clipboard:", text);
                 setCopiedIndex(index);
+                setFlashingIndex(index);
                 setTimeout(() => {
                     setCopiedIndex(-1);
-                }, 1000);
+                    setFlashingIndex(-1);
+                }, 500);
             },
             (err) => {
                 console.error("Could not copy text:", err);
@@ -152,12 +155,22 @@ const CoverLetter: React.FC = () => {
             </div>
             {isLoading && loadingAnimation ? (
                 <div className="flex justify-center">
-                    <Lottie animationData={loadingAnimation} style={{  }} />
+                    <Lottie animationData={loadingAnimation} style={{}} />
                 </div>
             ) : (
                 generatedText && (
-                    <div className="p-4 bg-accent rounded-md text-subText mt-6">
+                    <div
+                        onClick={() => handleCopy(generatedText, 0)}
+                        className={`group relative p-4 bg-accent rounded-md text-subText mt-6 hover:cursor-pointer hover:outline hover:outline-indigo-500 hover:outline-offset-2 ${flashingIndex === 0 ? "hover:outline-emerald-400" : ""}`}
+                        style={{ transition: "border-color 200ms" }}
+                    >
                         <div className="whitespace-pre-line">{generatedText}</div>
+                        <div className="hidden group-hover:block absolute top-0 right-0 bg-black text-white text-xs px-2 py-1 rounded-bl-md rounded-tr-md">
+                            <div className="flex gap-1 items-center">
+                                <ClipboardDocumentIcon className='h-3 w-3' />
+                                <p>{flashingIndex === 0 ? "Copied!" : "Copy"}</p>
+                            </div>
+                        </div>
                     </div>
                 )
             )}
