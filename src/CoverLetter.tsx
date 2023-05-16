@@ -137,14 +137,14 @@ const CoverLetter: React.FC = () => {
             <div className="flex gap-3 py-4">
                 <button
                     onClick={() => handleCopy(generatedText, 0)}
-                    className="bg-slate-100 text-secondaryBase px-4 py-2 rounded-md font-bold hover:bg-slate-300 text-sm disabled:bg-gray-300"
+                    className="bg-slate-100 text-secondaryBase px-4 py-2 rounded-md font-bold hover:bg-slate-300 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
                     disabled={isLoading}
                 >
                     COPY
                 </button>
                 <button
                     onClick={handleSubmit}
-                    className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500"
+                    className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500 disabled:cursor-not-allowed"
                     disabled={isLoading}
                 >
                     {isLoading ? 'LOADING...' : 'DRAFT LETTER'}
