@@ -4,10 +4,19 @@ import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import AuthButtons from './AuthButtons';
+import { useAuth0 } from "@auth0/auth0-react";
+
+export interface SavedItem {
+  label: string;
+  text: string;
+  _id: number;
+}
 
 const NavBar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, isLoading } = useAuth0();
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -33,6 +42,18 @@ const NavBar: React.FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const fetchSavedItems = async () => {
+      if (isAuthenticated) {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/${user?.sub}/links`);
+        const items = await response.json();
+        setSavedItems(items);
+      }
+    };
+
+    fetchSavedItems();
+  }, [isAuthenticated, user]);
+
   const composeSubRoutes = ["/compose", "/compose/cover-letter", "/compose/resume", "/compose/questions"];
 
   return (
@@ -40,7 +61,11 @@ const NavBar: React.FC = () => {
       <div className="container mx-auto flex justify-between items-center px-4">
         <Link to="/">
           <div className="bg-secondaryLight w-12 h-12 flex items-center justify-center rounded-full">
-            <span className="text-l font-bold text-secondaryBase">WC</span>
+            {isAuthenticated ? (
+              <img className="w-12 h-12 flex items-center justify-center rounded-full" src={user?.picture} alt={user?.name} />
+            ) : (
+              <span className="text-l font-bold text-secondaryBase">JN</span>
+            )}
           </div>
         </Link>
         <div className="relative">
