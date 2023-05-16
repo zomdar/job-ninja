@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import InputWithSave from "./InputWithSave";
-import { TrashIcon, PencilIcon } from "@heroicons/react/24/solid";
+import { TrashIcon, PencilIcon, ClipboardIcon, DocumentCheckIcon } from "@heroicons/react/24/solid";
 import { useAuth0 } from "@auth0/auth0-react";
 
 export interface SavedItem {
@@ -31,7 +31,7 @@ const Home: React.FC = () => {
     };
 
     fetchSavedItems();
-    
+
   }, [isAuthenticated, user]);
 
   if (isLoading) {
@@ -300,14 +300,17 @@ const Home: React.FC = () => {
               </div>
               <div
                 key={index}
-                className={`content flex gap-2 p-2 rounded-md cursor-pointer border-transparent group-hover:border group-hover:border-gray-300 group-hover:bg-linksHoverBackground ${flashingIndex === index ? "group-hover:border-green-500" : ""
-                  }`}
+                className={`relative content flex items-center gap-2 p-2 rounded-md cursor-pointer border-transparent group-hover:border group-hover:border-gray-300 group-hover:bg-linksHoverBackground ${flashingIndex === index ? "group-hover:border-green-500" : ""}`}
                 onClick={() => handleCopy(text, index)}
                 style={{ transition: "border-color 200ms" }}
               >
                 <span className="font-bold">{label}:</span>
                 <span className="truncate w-4/5">{text}</span>
+                <span className="hidden group-hover:block absolute right-1 text-white text-xs px-2 py-1 rounded-lg">
+                  {flashingIndex === index ? <DocumentCheckIcon className='h-5 w-5' /> : <ClipboardIcon className='h-5 w-5' />}
+                </span>
               </div>
+
             </div>
           </div>
         ))}

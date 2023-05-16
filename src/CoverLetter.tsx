@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ClipboardDocumentIcon } from "@heroicons/react/24/solid";
+import { DocumentCheckIcon, ClipboardIcon } from "@heroicons/react/24/solid";
 import Lottie from 'lottie-react';
 
 const CoverLetter: React.FC = () => {
@@ -167,7 +167,7 @@ const CoverLetter: React.FC = () => {
                         <div className="whitespace-pre-line">{generatedText}</div>
                         <div className="hidden group-hover:block absolute top-0 right-0 bg-black text-white text-xs px-2 py-1 rounded-bl-md rounded-tr-md">
                             <div className="flex gap-1 items-center">
-                                <ClipboardDocumentIcon className='h-3 w-3' />
+                                {flashingIndex === 0 ? <DocumentCheckIcon className='h-3 w-3' /> : <ClipboardIcon className='h-3 w-3' />}
                                 <p>{flashingIndex === 0 ? "Copied!" : "Copy"}</p>
                             </div>
                         </div>
