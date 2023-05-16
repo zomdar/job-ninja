@@ -291,7 +291,7 @@ const Home: React.FC = () => {
                   </button>
                   <button
                     onClick={() => openModalForEdit(index)}
-                    className="flex gap-1 justify-center bg-secondaryBase text-draculaBackground text-xs py-2 px-3 rounded font-bold shadow-md hover:bg-draculaComment opacity-0 group-hover:opacity-100"
+                    className="flex gap-1 justify-center bg-blue-600 text-draculaBackground text-xs py-2 px-3 rounded font-bold shadow-md hover:bg-blue-500 opacity-0 group-hover:opacity-100"
                   >
                     <PencilIcon className="h-3 w-3" />
                     EDIT
