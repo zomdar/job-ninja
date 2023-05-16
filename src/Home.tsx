@@ -8,7 +8,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 export interface SavedItem {
   label: string;
   text: string;
-  _id: number;
+  _id: string;
 }
 
 const Home: React.FC = () => {
@@ -17,6 +17,7 @@ const Home: React.FC = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [flashingIndex, setFlashingIndex] = useState<number>(-1);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
+  const [deletingIndex, setDeletingIndex] = useState<number>(-1);
 
   const { user, isAuthenticated, isLoading } = useAuth0();
 
@@ -30,6 +31,7 @@ const Home: React.FC = () => {
     };
 
     fetchSavedItems();
+    
   }, [isAuthenticated, user]);
 
   if (isLoading) {
@@ -90,7 +92,15 @@ const Home: React.FC = () => {
 
 
   const handleDelete = async (index: number) => {
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/${user?.sub}/links/${savedItems[index]._id}`, {
+
+    if (user?.sub === undefined) {
+      console.error("user.sub is undefined");
+      return;
+    }
+
+    const url = `${process.env.REACT_APP_API_URL}/api/${encodeURIComponent(user?.sub)}/links`;
+
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/api/${encodeURIComponent(user.sub)}/links/${savedItems[index]._id}`, {
       method: 'DELETE',
     });
 
@@ -122,6 +132,13 @@ const Home: React.FC = () => {
     setShowModal(true);
   };
 
+
+  const openModalForDelete = (index: number) => {
+    setDeletingIndex(index);
+    setShowModal(true);
+  };
+
+
   const openModal = () => {
     setShowModal(true);
   };
@@ -133,13 +150,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="container mx-auto flex-col p-4">
-      {isAuthenticated && (
-        <div>
-          <img src={user?.picture} alt={user?.name} />
-          <h2>{user?.name}</h2>
-          <p>{user?.email}</p>
-        </div>
-      )}
       <div className="profile py-4">
         <h1
           className="text-4xl text-primaryBase font-extrabold"
@@ -150,7 +160,19 @@ const Home: React.FC = () => {
         >
           Profile
         </h1>
-        <h2 className="text-3xl font-extrabold pt-6 pb-3">Bio</h2>
+        <h2 className="text-3xl font-extrabold pt-6 pb-1">Bio</h2>
+        {isAuthenticated && (
+          <div className="py-2">
+            <div className="flex gap-2">
+              <p className="text-gray-200 font-bold">Name:</p>
+              <p className="text-gray-400">{user?.name}</p>
+            </div>
+            <div className="flex gap-2">
+              <p className="text-gray-200 font-bold">Email:</p>
+              <p className="text-gray-400">{user?.email}</p>
+            </div>
+          </div>
+        )}
         <p className="text-gray-400">
           This is your profile page. You can save your personal information here
           and copy it to your clipboard when you need it.
@@ -167,7 +189,7 @@ const Home: React.FC = () => {
           </button>
         </div>
       </div>
-      {showModal && (
+      {showModal && deletingIndex === -1 && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
           <div className="fixed z-10 inset-0 overflow-y-auto">
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -191,7 +213,7 @@ const Home: React.FC = () => {
                       className="text-lg leading-6 font-medium text-draculaBackground"
                       id="modal-title"
                     >
-                      Add New Item
+                      {editingIndex >= 0 ? 'Edit Item' : 'Add New Item'}
                     </h3>
                     <div className="mt-2">
                       <InputWithSave
@@ -207,18 +229,74 @@ const Home: React.FC = () => {
           </div>
         </div>
       )}
+      {showModal && deletingIndex !== -1 && (
+        <div className="fixed z-10 inset-0 overflow-y-auto">
+          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+              <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                      Delete Item
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Are you sure you want to delete this item? This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleDelete(deletingIndex);
+                      setDeletingIndex(-1);
+                      setShowModal(false);
+                    }}
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+                    Delete
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeletingIndex(-1);
+                      setShowModal(false);
+                    }}
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap justify-between mt-4 space-y-4">
         {savedItems.map(({ label, text }, index) => (
           <div className="flex-col my-3 w-1/2">
             <div className="group relative">
               <div className="absolute top-[-2.5rem] right-0 pr-1">
-                <button
-                  onClick={() => openModalForEdit(index)}
-                  className="flex gap-1 justify-center bg-secondaryBase text-draculaBackground text-xs py-2 px-3 rounded font-bold shadow-md hover:bg-draculaComment opacity-0 group-hover:opacity-100"
-                >
-                  <PencilIcon className="h-3 w-3" />
-                  EDIT
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => openModalForDelete(index)}
+                    className="flex gap-1 justify-center bg-red-500 text-draculaBackground text-xs py-2 px-3 rounded font-bold shadow-md hover:bg-red-400 opacity-0 group-hover:opacity-100"
+                  >
+                    <TrashIcon className="h-3 w-3" />
+                    Delete
+                  </button>
+                  <button
+                    onClick={() => openModalForEdit(index)}
+                    className="flex gap-1 justify-center bg-secondaryBase text-draculaBackground text-xs py-2 px-3 rounded font-bold shadow-md hover:bg-draculaComment opacity-0 group-hover:opacity-100"
+                  >
+                    <PencilIcon className="h-3 w-3" />
+                    EDIT
+                  </button>
+                </div>
               </div>
               <div
                 key={index}
@@ -234,11 +312,6 @@ const Home: React.FC = () => {
           </div>
         ))}
       </div>
-
-
-
-
-
     </div>
   );
 };
