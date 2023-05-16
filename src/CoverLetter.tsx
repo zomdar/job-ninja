@@ -1,7 +1,8 @@
 // src/CoverLetter.tsx
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Lottie from 'lottie-react';
 
 const CoverLetter: React.FC = () => {
     const [jobTitle, setJobTitle] = useState('');
@@ -11,6 +12,21 @@ const CoverLetter: React.FC = () => {
     const [copiedIndex, setCopiedIndex] = useState<number>(-1);
     const [jobTitleError, setJobTitleError] = useState(false);
     const [companyNameError, setCompanyNameError] = useState(false);
+    const [loadingAnimation, setLoadingAnimation] = useState(null);
+
+    useEffect(() => {
+        const fetchAnimationData = async () => {
+            try {
+                const response = await fetch('https://assets3.lottiefiles.com/packages/lf20_yfn1jaiue6.json');
+                const data = await response.json();
+                setLoadingAnimation(data);
+            } catch (e) {
+                console.error('Error fetching Lottie animation:', e);
+            }
+        };
+
+        fetchAnimationData();
+    }, []);
 
     const handleSubmit = async () => {
         // Reset error states
@@ -121,15 +137,23 @@ const CoverLetter: React.FC = () => {
             <div className="flex gap-3 py-4">
                 <button
                     onClick={() => handleCopy(generatedText, 0)}
-                    className="bg-accent text-secondaryBase px-4 py-2 rounded-md font-bold hover:bg-secondaryLightHover text-sm">
+                    className="bg-accent text-secondaryBase px-4 py-2 rounded-md font-bold hover:bg-stone-300 text-sm disabled:bg-gray-300"
+                    disabled={isLoading}
+                >
                     COPY
                 </button>
-                <button onClick={handleSubmit} className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryLightHover text-sm">
-                    DRAFT LETTER
+                <button
+                    onClick={handleSubmit}
+                    className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500"
+                    disabled={isLoading}
+                >
+                    {isLoading ? 'LOADING...' : 'DRAFT LETTER'}
                 </button>
             </div>
-            {isLoading ? (
-                <p className='mb-4 text-green'>Loading...</p>
+            {isLoading && loadingAnimation ? (
+                <div className="flex justify-center">
+                    <Lottie animationData={loadingAnimation} style={{  }} />
+                </div>
             ) : (
                 generatedText && (
                     <div className="p-4 bg-accent rounded-md text-subText mt-6">
