@@ -2,8 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { DocumentCheckIcon, ClipboardIcon } from "@heroicons/react/24/solid";
+import { DocumentCheckIcon, ClipboardIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import Lottie from 'lottie-react';
+import { useAuth0 } from "@auth0/auth0-react";
+
+interface UserData {
+  resumeRequests: number;
+  lastRequestDate: string;
+  // Add other properties as needed
+}
 
 const Resume: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -17,6 +24,9 @@ const Resume: React.FC = () => {
   const [companyNameError, setCompanyNameError] = useState(false);
   const [jobDescriptionError, setJobDescriptionError] = useState(false);
   const [loadingAnimation, setLoadingAnimation] = useState(null);
+  // add a state for the user
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const { user, isAuthenticated } = useAuth0();
 
   useEffect(() => {
     const fetchAnimationData = async () => {
@@ -31,6 +41,18 @@ const Resume: React.FC = () => {
 
     fetchAnimationData();
   }, []);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (isAuthenticated) {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${user?.sub}`);
+        const userData = await response.json();
+        setUserData(userData);
+      }
+    };
+
+    fetchUsers();
+  }, [isAuthenticated, user]);
 
   const handleSubmit = async () => {
     // Reset error states
@@ -106,6 +128,43 @@ const Resume: React.FC = () => {
       temperature: 0.8,
     };
 
+    if (user?.sub === undefined) {
+      console.error("user.sub is undefined");
+      return;
+    }
+
+    // Check if the user has reached their daily limit
+    if (userData && userData.resumeRequests >= 3) {
+      alert('You have reached your daily limit of 3 resume generations. Please subscribe to generate more.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    const url = `${process.env.REACT_APP_API_URL}/api/users/${encodeURIComponent(user?.sub)}/increment`;
+
+    // Check if the user has reached their daily limit
+    try {
+      await axios.put(url);
+      // update the user data after successful increment
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${user?.sub}`);
+      const updatedUserData = await response.json();
+      setUserData(updatedUserData);
+    } catch (error: any) {
+      if (error.response && error.response.status === 429) {
+        alert('You have reached your daily limit of 3 resume generations. Please subscribe to generate more.');
+        return;
+      } else {
+        if (error instanceof Error) {
+          console.error('Error incrementing resume count:', error.message);
+        } else {
+          console.error('An unknown error occurred:', error);
+        }
+        return;
+      }
+    }
+
+
     try {
       const response = await axios.post(ENDPOINT, data, config);
       const generatedText = response.data.choices[0].text;
@@ -133,8 +192,31 @@ const Resume: React.FC = () => {
     );
   };
 
+  function msToTime(duration: number): string {
+    let seconds: number | string = Math.floor((duration / 1000) % 60),
+      minutes: number | string = Math.floor((duration / (1000 * 60)) % 60),
+      hours: number | string = Math.floor((duration / (1000 * 60 * 60)) % 24);
+
+    hours = (hours < 10) ? "0" + hours : hours;
+    minutes = (minutes < 10) ? "0" + minutes : minutes;
+    seconds = (seconds < 10) ? "0" + seconds : seconds;
+
+    return hours + "hrs " + minutes + "min";
+  }
+
+
+
   return (
     <div className='py-6 flex-col'>
+       {userData && (
+        <div className='flex items-center p-3 mb-4 gap-2 bg-warningBaseBackground border-2 rounded-lg border-yellow-400 text-gray-900'>
+          <ExclamationTriangleIcon className='h-6 w-6 text-yellow-500'/>
+          <p>Tokens: {3 - userData.resumeRequests}</p>
+          {userData.resumeRequests >= 3 && (
+            <p>Resets: {msToTime(new Date(userData.lastRequestDate).getTime() + 24 * 60 * 60 * 1000 - Date.now())}</p>
+          )}
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">
         <input
           type="text"
@@ -172,7 +254,7 @@ const Resume: React.FC = () => {
         <button
           onClick={handleSubmit}
           className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500 disabled:cursor-not-allowed"
-          disabled={isLoading}
+          disabled={isLoading || (userData?.resumeRequests || 0) >= 3}
         >
           {isLoading ? 'LOADING...' : 'GENERATE RESUME'}
         </button>
