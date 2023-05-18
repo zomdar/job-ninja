@@ -5,12 +5,7 @@ import axios from 'axios';
 import { DocumentCheckIcon, ClipboardIcon, ExclamationTriangleIcon } from "@heroicons/react/24/solid";
 import Lottie from 'lottie-react';
 import { useAuth0 } from "@auth0/auth0-react";
-
-interface UserData {
-  resumeRequests: number;
-  lastRequestDate: string;
-  // Add other properties as needed
-}
+import { useStores } from './stores';
 
 const Resume: React.FC = () => {
   const [jobTitle, setJobTitle] = useState('');
@@ -24,9 +19,17 @@ const Resume: React.FC = () => {
   const [companyNameError, setCompanyNameError] = useState(false);
   const [jobDescriptionError, setJobDescriptionError] = useState(false);
   const [loadingAnimation, setLoadingAnimation] = useState(null);
-  // add a state for the user
-  const [userData, setUserData] = useState<UserData | null>(null);
+
   const { user, isAuthenticated } = useAuth0();
+  const { userStore } = useStores();
+  const [refreshKey, setRefreshKey] = useState(Date.now()); // Add a refreshKey
+
+  // useEffect for fetching user
+  useEffect(() => {
+    if (user?.sub) {
+      userStore.fetchUser(user?.sub);
+    }
+  }, [user?.sub, refreshKey]); // add refreshKey as a dependency
 
   useEffect(() => {
     const fetchAnimationData = async () => {
@@ -41,18 +44,6 @@ const Resume: React.FC = () => {
 
     fetchAnimationData();
   }, []);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (isAuthenticated) {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${user?.sub}`);
-        const userData = await response.json();
-        setUserData(userData);
-      }
-    };
-
-    fetchUsers();
-  }, [isAuthenticated, user]);
 
   const handleSubmit = async () => {
     // Reset error states
@@ -134,7 +125,7 @@ const Resume: React.FC = () => {
     }
 
     // Check if the user has reached their daily limit
-    if (userData && userData.resumeRequests >= 3) {
+    if (userStore.user && userStore.user.resumeRequests >= 3) {
       alert('You have reached your daily limit of 3 resume generations. Please subscribe to generate more.');
       return;
     }
@@ -143,13 +134,9 @@ const Resume: React.FC = () => {
 
     const url = `${process.env.REACT_APP_API_URL}/api/users/${encodeURIComponent(user?.sub)}/increment`;
 
-    // Check if the user has reached their daily limit
+    // Increment the user's resume count
     try {
-      await axios.put(url);
-      // update the user data after successful increment
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/users/${user?.sub}`);
-      const updatedUserData = await response.json();
-      setUserData(updatedUserData);
+      await userStore.incrementResumeCount(user?.sub);
     } catch (error: any) {
       if (error.response && error.response.status === 429) {
         alert('You have reached your daily limit of 3 resume generations. Please subscribe to generate more.');
@@ -164,7 +151,6 @@ const Resume: React.FC = () => {
       }
     }
 
-
     try {
       const response = await axios.post(ENDPOINT, data, config);
       const generatedText = response.data.choices[0].text;
@@ -173,6 +159,7 @@ const Resume: React.FC = () => {
       console.error('Error generating resume:', error);
     } finally {
       setIsLoading(false);
+      setRefreshKey(Date.now()); // Toggle the refreshKey to trigger useEffect
     }
   };
 
@@ -204,16 +191,14 @@ const Resume: React.FC = () => {
     return hours + "hrs " + minutes + "min";
   }
 
-
-
   return (
     <div className='py-6 flex-col'>
-       {userData && (
+      {userStore.user && (
         <div className='flex items-center p-3 mb-4 gap-2 bg-warningBaseBackground border-2 rounded-lg border-yellow-400 text-gray-900'>
-          <ExclamationTriangleIcon className='h-6 w-6 text-yellow-500'/>
-          <p>Tokens: {3 - userData.resumeRequests}</p>
-          {userData.resumeRequests >= 3 && (
-            <p>Resets: {msToTime(new Date(userData.lastRequestDate).getTime() + 24 * 60 * 60 * 1000 - Date.now())}</p>
+          <ExclamationTriangleIcon className='h-6 w-6 text-yellow-500' />
+          <p>Tokens: {3 - userStore.user.resumeRequests}</p>
+          {userStore.user.resumeRequests >= 3 && (
+            <p>Resets: {msToTime(new Date(userStore.user.lastRequestDate).getTime() + 24 * 60 * 60 * 1000 - Date.now())}</p>
           )}
         </div>
       )}
@@ -254,7 +239,7 @@ const Resume: React.FC = () => {
         <button
           onClick={handleSubmit}
           className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500 disabled:cursor-not-allowed"
-          disabled={isLoading || (userData?.resumeRequests || 0) >= 3}
+          disabled={isLoading || (userStore.user?.resumeRequests || 0) >= 3}
         >
           {isLoading ? 'LOADING...' : 'GENERATE RESUME'}
         </button>
