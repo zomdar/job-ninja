@@ -5,6 +5,8 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import AuthButtons from './AuthButtons';
 import { useAuth0 } from "@auth0/auth0-react";
+import { observer } from "mobx-react-lite";
+import { useStores } from './stores';
 
 export interface SavedItem {
   label: string;
@@ -12,11 +14,11 @@ export interface SavedItem {
   _id: number;
 }
 
-const NavBar: React.FC = () => {
+const NavBar: React.FC = observer(() => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, isAuthenticated, isLoading } = useAuth0();
-  const [savedItems, setSavedItems] = useState<SavedItem[]>([]);
+  const { isAuthenticated } = useAuth0();
+  const { userStore } = useStores();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -42,18 +44,6 @@ const NavBar: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchSavedItems = async () => {
-      if (isAuthenticated) {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/${user?.sub}/links`);
-        const items = await response.json();
-        setSavedItems(items);
-      }
-    };
-
-    fetchSavedItems();
-  }, [isAuthenticated, user]);
-
   const composeSubRoutes = ["/compose", "/compose/cover-letter", "/compose/resume", "/compose/questions"];
 
   return (
@@ -62,7 +52,8 @@ const NavBar: React.FC = () => {
         <Link to="/">
           <div className="bg-secondaryLight w-12 h-12 flex items-center justify-center rounded-full">
             {isAuthenticated ? (
-              <img className="w-12 h-12 flex items-center justify-center rounded-full" src={user?.picture} alt={user?.name} />
+              // <img className="w-12 h-12 flex items-center justify-center rounded-full" src={user?.picture} alt={user?.name} />
+              <span className="text-l font-bold text-secondaryBase">{userStore.name.substring(0, 2).toUpperCase()}</span>
             ) : (
               <span className="text-l font-bold text-secondaryBase">JN</span>
             )}
@@ -90,6 +81,17 @@ const NavBar: React.FC = () => {
               </NavLink>
               <NavLink
                 onClick={handleChoiceClick}
+                to="/profile"
+                className={({ isActive }) =>
+                  isActive
+                    ? "block px-4 py-2 text-secondaryBase hover:bg-indigo-100 font-bold"
+                    : "block px-4 py-2 text-secondaryBase hover:bg-indigo-100"
+                }
+              >
+                Profile
+              </NavLink>
+              <NavLink
+                onClick={handleChoiceClick}
                 to="/compose/cover-letter"
                 className={({ isActive }) =>
                   isActive || composeSubRoutes.includes(location.pathname)
@@ -107,6 +109,6 @@ const NavBar: React.FC = () => {
       </div>
     </nav>
   );
-};
+});
 
 export default NavBar;

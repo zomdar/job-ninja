@@ -1,43 +1,17 @@
 import React, { useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import axios from 'axios';
+import { useStores } from './stores';
 
 const AuthButtons: React.FC = () => {
   const { user, isAuthenticated, loginWithRedirect, logout } = useAuth0();
   const redirectUri = process.env.REACT_APP_AUTH0_REDIRECT_URI!;
+  const { userStore } = useStores(); 
 
   useEffect(() => {
-    if (isAuthenticated && user) {
-      const checkAndCreateUser = async () => {
-        try {
-          let response;
-
-          if (user.sub !== undefined) {
-            response = await axios.get(`${process.env.REACT_APP_API_URL}/api/users/${encodeURIComponent(user.sub)}`);
-          } else {
-            // handle the case where auth0Id is undefined
-          }
-
-          if (response && response.data) {
-            console.log("User already exists");
-            return;
-          }
-
-          const createUserResponse = await axios.post(`${process.env.REACT_APP_API_URL}/api/users`, {
-            auth0Id: user.sub,
-            name: user.name,
-            email: user.email,
-            picture: user.picture,
-          });
-          console.log("Created user", createUserResponse.data);
-        } catch (error) {
-          console.log(error);
-        }
-      };
-      checkAndCreateUser();
+    if (isAuthenticated && user?.sub) {
+      userStore.fetchUser(user.sub);
     }
   }, [isAuthenticated, user]);
-
 
   const handleLogin = () => {
     loginWithRedirect({ appState: { returnTo: redirectUri } });

@@ -1,7 +1,7 @@
 // src/InputWithSave.tsx
 
 import React, { useState, useEffect } from "react";
-import { SavedItem } from "./Home";
+import { SavedItem } from "./Profile";
 
 interface InputWithSaveProps {
   onSave: (label: string, text: string) => void;
