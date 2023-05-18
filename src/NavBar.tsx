@@ -53,7 +53,7 @@ const NavBar: React.FC = observer(() => {
           <div className="bg-secondaryLight w-12 h-12 flex items-center justify-center rounded-full">
             {isAuthenticated ? (
               // <img className="w-12 h-12 flex items-center justify-center rounded-full" src={user?.picture} alt={user?.name} />
-              <span className="text-l font-bold text-secondaryBase">{userStore.name.substring(0, 2).toUpperCase()}</span>
+              <span className="text-l font-bold text-secondaryBase">{userStore.user?.name.substring(0, 2).toUpperCase()}</span>
             ) : (
               <span className="text-l font-bold text-secondaryBase">JN</span>
             )}

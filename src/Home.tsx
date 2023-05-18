@@ -29,7 +29,7 @@ const Home: React.FC = observer(() => {
         >
           Home
         </h1>
-        <h2 className="text-3xl font-extrabold pt-6 pb-1">Welcome to Job Ninja, {userStore.name}</h2>
+        <h2 className="text-3xl font-extrabold pt-6 pb-1">Welcome to Job Ninja, {userStore.user?.name}</h2>
         {/* You can use userStore.name, userStore.email, and other properties here */}
       </div>
     </div>
