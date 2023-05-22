@@ -37,7 +37,7 @@ class UserStore {
     }
   };
 
-  async incrementResumeCount(auth0Id: string) {
+  incrementResumeCount = async (auth0Id: string) => {
     if (!auth0Id) return;
     const response = await axios.put(`${process.env.REACT_APP_API_URL}/api/users/${encodeURIComponent(auth0Id)}/increment`);
     if (response.status === 200) {
