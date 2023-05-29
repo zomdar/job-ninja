@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import InputWithSave from "./InputWithSave";
 import { TrashIcon, PencilIcon, ClipboardIcon, DocumentCheckIcon } from "@heroicons/react/24/solid";
 import { useAuth0 } from "@auth0/auth0-react";
+import { useStores } from './stores';
 
 export interface SavedItem {
   label: string;
@@ -18,6 +19,7 @@ const Profile: React.FC = () => {
   const [flashingIndex, setFlashingIndex] = useState<number>(-1);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
   const [deletingIndex, setDeletingIndex] = useState<number>(-1);
+  const { userStore } = useStores();
 
   const { user, isAuthenticated, isLoading } = useAuth0();
 
@@ -160,6 +162,15 @@ const Profile: React.FC = () => {
         >
           Profile
         </h1>
+        <h2 className="text-xl font-extrabold pt-6">Plan</h2>
+        {userStore.user && (
+          <div className="py">
+            <div className="flex gap-2">
+              <p className="text-gray-200 font-bold">Tokens:</p>
+              <p className="text-gray-400">{3 - userStore.user.resumeRequests}</p>
+            </div>
+          </div>
+        )}
         <h2 className="text-3xl font-extrabold pt-6 pb-1">Bio</h2>
         {isAuthenticated && (
           <div className="py-2">
@@ -173,10 +184,6 @@ const Profile: React.FC = () => {
             </div>
           </div>
         )}
-        <p className="text-gray-400">
-          This is your profile page. You can save your personal information here
-          and copy it to your clipboard when you need it.
-        </p>
       </div>
       <div className="link-items flex justify-between items-center">
         <h2 className="text-3xl font-extrabold pt-6 pb-3">Links</h2>
