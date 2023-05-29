@@ -193,7 +193,7 @@ const Resume: React.FC = () => {
 
   return (
     <div className='py-6 flex-col'>
-      {userStore.user && (
+      {/* {userStore.user && (
         <div className='flex items-center p-3 mb-4 gap-2 bg-warningBaseBackground border-2 rounded-lg border-yellow-400 text-gray-900'>
           <ExclamationTriangleIcon className='h-6 w-6 text-yellow-500' />
           <p>Tokens: {3 - userStore.user.resumeRequests}</p>
@@ -201,31 +201,30 @@ const Resume: React.FC = () => {
             <p>Resets: {msToTime(new Date(userStore.user.lastRequestDate).getTime() + 24 * 60 * 60 * 1000 - Date.now())}</p>
           )}
         </div>
-      )}
-      <div className="flex flex-wrap gap-2">
+      )} */}
+      <div className="flex flex-col md:flex-row gap-2 mb-4">
         <input
           type="text"
           placeholder="Job Title"
           value={jobTitle}
           onChange={(e) => setJobTitle(e.target.value)}
-          className={`bg-accent text-subText rounded-md py-2 px-6 ${jobTitleError ? 'border-2 border-red-500' : ''}`}
+          className={`flex-grow bg-accent text-subText rounded-md py-2 px-6 ${jobTitleError ? 'border-2 border-red-500' : ''}`}
         />
         <input
           type="text"
           placeholder="Company Name"
           value={companyName}
           onChange={(e) => setCompanyName(e.target.value)}
-          className={`bg-accent text-subText rounded-md py-2 px-6 ${companyNameError ? 'border-2 border-red-500' : ''}`}
+          className={`flex-grow bg-accent text-subText rounded-md py-2 px-6 ${companyNameError ? 'border-2 border-red-500' : ''}`}
         />
       </div>
-      <div className="flex py-2">
+      <div className="mb-4">
         <textarea
           placeholder="Job Description"
           rows={4}
-          cols={50}
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
-          className={`bg-accent text-subText rounded-md py-2 px-4 ${jobDescriptionError ? 'border-2 border-red-500' : ''}`}
+          className={`w-full bg-accent text-subText rounded-md py-2 px-4 ${jobDescriptionError ? 'border-2 border-red-500' : ''}`}
         />
       </div>
       <div className="flex gap-3 py-4">
@@ -241,7 +240,9 @@ const Resume: React.FC = () => {
           className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500 disabled:cursor-not-allowed"
           disabled={isLoading || (userStore.user?.resumeRequests || 0) >= 3}
         >
-          {isLoading ? 'LOADING...' : 'GENERATE RESUME'}
+          {isLoading
+            ? 'LOADING...'
+            : `GENERATE RESUME (${3 - (userStore.user?.resumeRequests || 0)})`}
         </button>
       </div>
       {isLoading && loadingAnimation ? (
