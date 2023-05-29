@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { DocumentCheckIcon, ClipboardIcon } from "@heroicons/react/24/solid";
 import Lottie from 'lottie-react';
+import { useStores } from './stores';
+import { useAuth0 } from "@auth0/auth0-react";
 
 const CoverLetter: React.FC = () => {
     const [jobTitle, setJobTitle] = useState('');
@@ -15,6 +17,16 @@ const CoverLetter: React.FC = () => {
     const [jobTitleError, setJobTitleError] = useState(false);
     const [companyNameError, setCompanyNameError] = useState(false);
     const [loadingAnimation, setLoadingAnimation] = useState(null);
+    const { userStore } = useStores();
+    const { user, isAuthenticated } = useAuth0();
+    const [refreshKey, setRefreshKey] = useState(Date.now()); // Add a refreshKey
+
+    // useEffect for fetching user
+    useEffect(() => {
+        if (user?.sub) {
+            userStore.fetchUser(user?.sub);
+        }
+    }, [user?.sub, refreshKey]); // add refreshKey as a dependency
 
     useEffect(() => {
         const fetchAnimationData = async () => {
@@ -51,6 +63,17 @@ const CoverLetter: React.FC = () => {
 
         // Return if there are any errors, preventing the API call
         if (localJobTitleError || localCompanyNameError) {
+            return;
+        }
+
+        // Check if the user has reached their daily limit
+        if (userStore.user && userStore.user.resumeRequests >= 3) {
+            alert('You have reached your daily limit of 3 resume generations. Please subscribe to generate more.');
+            return;
+        }
+
+        if (user?.sub === undefined) {
+            console.error("user.sub is undefined");
             return;
         }
 
@@ -92,6 +115,25 @@ const CoverLetter: React.FC = () => {
         };
 
 
+        const url = `${process.env.REACT_APP_API_URL}/api/users/${encodeURIComponent(user?.sub)}/increment`;
+
+        // Increment the user's resume count
+        try {
+            await userStore.incrementResumeCount(user?.sub);
+        } catch (error: any) {
+            if (error.response && error.response.status === 429) {
+                alert('You have reached your daily limit of 3 resume generations. Please subscribe to generate more.');
+                return;
+            } else {
+                if (error instanceof Error) {
+                    console.error('Error incrementing resume count:', error.message);
+                } else {
+                    console.error('An unknown error occurred:', error);
+                }
+                return;
+            }
+        }
+
         try {
             const response = await axios.post(ENDPOINT, data, config);
             const generatedText = response.data.choices[0].text;
@@ -121,20 +163,22 @@ const CoverLetter: React.FC = () => {
 
     return (
         <div className='py-6 flex-col'>
-            <div className="flex">
+            <div className="flex flex-col md:flex-row gap-2 mb-4">
                 <input
                     type="text"
                     placeholder="Job Title"
                     value={jobTitle}
                     onChange={(e) => setJobTitle(e.target.value)}
-                    className={`bg-accent text-subText rounded-md py-2 px-4 mr-2 ${jobTitleError ? 'border-2 border-red-500' : ''}`}
+                    maxLength={50}
+                    className={`flex-grow bg-accent text-subText rounded-md py-2 px-6 ${jobTitleError ? 'border-2 border-red-500' : ''}`}
                 />
                 <input
                     type="text"
                     placeholder="Company Name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    className={`bg-accent text-subText rounded-md py-2 px-4 mr-2 ${companyNameError ? 'border-2 border-red-500' : ''}`}
+                    maxLength={50}
+                    className={`flex-grow bg-accent text-subText rounded-md py-2 px-6 ${companyNameError ? 'border-2 border-red-500' : ''}`}
                 />
             </div>
             <div className="flex gap-3 py-4">
@@ -148,9 +192,11 @@ const CoverLetter: React.FC = () => {
                 <button
                     onClick={handleSubmit}
                     className="bg-secondaryBase text-accent px-4 py-2 rounded-md font-bold hover:bg-secondaryBaseHover text-sm disabled:bg-gray-500 disabled:cursor-not-allowed"
-                    disabled={isLoading}
+                    disabled={isLoading || (userStore.user?.resumeRequests || 0) >= 3}
                 >
-                    {isLoading ? 'LOADING...' : 'DRAFT LETTER'}
+                    {isLoading
+                        ? 'LOADING...'
+                        : `GENERATE COVER LETTER (${3 - (userStore.user?.resumeRequests || 0)})`}
                 </button>
             </div>
             {isLoading && loadingAnimation ? (
